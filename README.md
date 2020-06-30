@@ -9,6 +9,14 @@ Until I register it as a public pip package, I recommend the following procedure
 1. Clone the repository to your local machine and navigate to the main directory
 2. Run ``sudo pip install -e ./`` in order to install the ``tensiga`` package locally on your machine. The installation references to the cloned repository. You can work on this repository and changes will be immediately applied to the installation.
 
+## Testing
+
+Test, although there are not many, can be run via
+
+    $ pytest --pyargs tensiga
+
+In order to save time, I've used the ``__main__`` function to verify my implementation visually... I can convert these into suitable tests in not so much time.
+
 ## Examples
 
 Under ``bin/`` you can find some examples to run. Other than that, many modules and routines have sample code in the ``__main__`` function, which can be run directly from the terminal, i.e.
