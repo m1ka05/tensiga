@@ -1,0 +1,640 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Documentation &mdash; An efficient isogeometric Galerkin method for IEVP  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Theory" href="theory.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> An efficient isogeometric Galerkin method for IEVP
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="timeline.html">Timeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#iga-package">IGA package</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">An efficient isogeometric Galerkin method for IEVP</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Documentation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/documentation.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="documentation">
+<h1>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h1>
+<p>This documentation covers the implementation of the new Galerkin method. Examples
+for each module can be found in the source code in the main section of the
+respective module. To gain an overview over the code base reference
+the <a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a>.</p>
+<div class="section" id="iga-package">
+<h2>IGA package<a class="headerlink" href="#iga-package" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="tensiga.iga.fspan.fspan">
+<code class="sig-prename descclassname">tensiga.iga.fspan.</code><code class="sig-name descname">fspan</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">u</span></em>, <em class="sig-param"><span class="n">p</span></em>, <em class="sig-param"><span class="n">U</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tensiga.iga.fspan.fspan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the span index in <img class="math" src="_images/math/9098c1c4618d7a0f321cee441aabee7f1b57a19b.png" alt="U"/>, in which <img class="math" src="_images/math/9b444cf6329a14140aee8ff5a06ff30772cc1c2f.png" alt="u"/> lies</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>u</strong> (<em>float</em>) – evaluation point <img class="math" src="_images/math/9b444cf6329a14140aee8ff5a06ff30772cc1c2f.png" alt="u"/></p></li>
+<li><p><strong>p</strong> (<em>int</em>) – basis function degree <img class="math" src="_images/math/141bbefb74014fc5e43499901bf78607ae335583.png" alt="p"/></p></li>
+<li><p><strong>U</strong> (<em>np.array</em><em>(</em><em>float</em><em>)</em>) – knot vector <img class="math" src="_images/math/9098c1c4618d7a0f321cee441aabee7f1b57a19b.png" alt="U"/></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>span index <img class="math" src="_images/math/d4f60b8dd0aa91829850bb631c9bfff9d37e7d25.png" alt="i : [U_i, U_{i+1})"/></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tensiga.iga.auxkv.auxkv">
+<code class="sig-prename descclassname">tensiga.iga.auxkv.</code><code class="sig-name descname">auxkv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">U</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tensiga.iga.auxkv.auxkv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the auxiliary knot vector <img class="math" src="_images/math/95f028ab2b20b895fa12d986e0d9f40f7b6e52d3.png" alt="Z"/> and the multiplicity vector
+<img class="math" src="_images/math/4abba779877abb276b98ccb2b4ba9bf2e41947ab.png" alt="M"/> of each breakpoint in <img class="math" src="_images/math/95f028ab2b20b895fa12d986e0d9f40f7b6e52d3.png" alt="Z"/>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>U</strong> (<em>np.array</em><em>(</em><em>float</em><em>)</em>) – knot vector</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>auxiliary knot vector <img class="math" src="_images/math/95f028ab2b20b895fa12d986e0d9f40f7b6e52d3.png" alt="Z"/> and
+multiplicity vector <img class="math" src="_images/math/4abba779877abb276b98ccb2b4ba9bf2e41947ab.png" alt="M"/></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array(float),  np.array(float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tensiga.iga.bfun.bfun">
+<code class="sig-prename descclassname">tensiga.iga.bfun.</code><code class="sig-name descname">bfun</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em>, <em class="sig-param"><span class="n">u</span></em>, <em class="sig-param"><span class="n">p</span></em>, <em class="sig-param"><span class="n">U</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tensiga.iga.bfun.bfun" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluates a single bspline basis function <img class="math" src="_images/math/a625c917f2824c56ef7294970323e4b42d6e6708.png" alt="B_{i,p}(u)"/>
+at the coordinate <img class="math" src="_images/math/9b444cf6329a14140aee8ff5a06ff30772cc1c2f.png" alt="u"/></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>i</strong> (<em>int</em>) – basis function index</p></li>
+<li><p><strong>u</strong> (<em>float</em>) – evaluation point</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – basis function degree</p></li>
+<li><p><strong>U</strong> (<em>np.array</em><em>(</em><em>float</em><em>)</em>) – knot vector</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>scalar value of <img class="math" src="_images/math/a625c917f2824c56ef7294970323e4b42d6e6708.png" alt="B_{i,p}(u)"/></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tensiga.iga.bfuns.bfuns">
+<code class="sig-prename descclassname">tensiga.iga.bfuns.</code><code class="sig-name descname">bfuns</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em>, <em class="sig-param"><span class="n">u</span></em>, <em class="sig-param"><span class="n">p</span></em>, <em class="sig-param"><span class="n">U</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tensiga.iga.bfuns.bfuns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluates all non-zero bspline basis functions <img class="math" src="_images/math/198f8e1f08d7ba8df7a75b999ae59a60ff637d19.png" alt="B_{j,p}(u)"/>
+at <img class="math" src="_images/math/9b444cf6329a14140aee8ff5a06ff30772cc1c2f.png" alt="u"/></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>i</strong> (<em>int</em>) – knot span in which <img class="math" src="_images/math/9b444cf6329a14140aee8ff5a06ff30772cc1c2f.png" alt="u"/> lies</p></li>
+<li><p><strong>u</strong> (<em>float</em>) – evaluation point</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – basis function degree</p></li>
+<li><p><strong>U</strong> (<em>np.array</em><em>(</em><em>float</em><em>)</em>) – knot vector</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>scalar value for each <img class="math" src="_images/math/b5e87cad8b2e820388ff1d67c8af328b7bed7433.png" alt="B_{j,p}(u) \geq 0"/>,
+<img class="math" src="_images/math/1757717c7157bbceec0ba22b02a54c2f183a87a7.png" alt="j=i-p\ldots i"/> (<img class="math" src="_images/math/836599f3913afb220840a4bcd8b33b2dbebfae75.png" alt="p+1"/> values)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array(float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tensiga.iga.bfunsop.bfunsop">
+<code class="sig-prename descclassname">tensiga.iga.bfunsop.</code><code class="sig-name descname">bfunsop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">u</span></em>, <em class="sig-param"><span class="n">p</span></em>, <em class="sig-param"><span class="n">U</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tensiga.iga.bfunsop.bfunsop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes values, rows and cols for an operator (a sparse matrix) of the form
+<img class="math" src="_images/math/7ce47e612b710900764463932d54a397017e9a98.png" alt="B_{ij}=B_{i,p}(u_j)"/></p>
+<p>For perfomance and flexibility reasons the sparse matrix is to be
+constructed out of the return values,
+e.g. <cite>scipy.sparse.csc_matrix(vals, rows, cols)</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>u</strong> (<em>np.array</em><em>(</em><em>float</em><em>)</em>) – evaluation point(s)</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – basis function degree</p></li>
+<li><p><strong>U</strong> (<em>np.array</em><em>(</em><em>float</em><em>)</em>) – knot vector</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(values, (rows, cols))</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(float, (float, float))</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tensiga.iga.bfunsop.bfunsmat">
+<code class="sig-prename descclassname">tensiga.iga.bfunsop.</code><code class="sig-name descname">bfunsmat</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">u</span></em>, <em class="sig-param"><span class="n">p</span></em>, <em class="sig-param"><span class="n">U</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tensiga.iga.bfunsop.bfunsmat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes a matrix of the form <img class="math" src="_images/math/0d4c32bb71e2393c44990e2eb555ce0c353d7774.png" alt="B_{ij}"/>, where
+<img class="math" src="_images/math/97f0f17019b84be50119a418fa61e176ca20ccad.png" alt="i=0\ldots p"/> and for each <img class="math" src="_images/math/e3fc28292267f066fee7718c64f4bbfece521f24.png" alt="j"/> th column the
+row <img class="math" src="_images/math/5aa339d4daf45a810dda332e3c80a0698e526e04.png" alt="i"/> of the matrix corresponds to the value of
+<img class="math" src="_images/math/a084ad5e9acc60559b84a80934e1c6a7304739f7.png" alt="(\mathrm{span}(u_j)-p+i)"/> th bspline basis function at
+<img class="math" src="_images/math/a756de229224dbe999b78e4f6fef2b6c0d3a6e39.png" alt="u_j"/>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>u</strong> (<em>np.array</em><em>(</em><em>float</em><em>)</em>) – evaluation point(s)</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – basis function degree</p></li>
+<li><p><strong>U</strong> (<em>np.array</em><em>(</em><em>float</em><em>)</em>) – knot vector</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>matrix <img class="math" src="_images/math/0d4c32bb71e2393c44990e2eb555ce0c353d7774.png" alt="B_{ij}"/></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array(float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tensiga.iga.dbfun.dbfun">
+<code class="sig-prename descclassname">tensiga.iga.dbfun.</code><code class="sig-name descname">dbfun</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em>, <em class="sig-param"><span class="n">n</span></em>, <em class="sig-param"><span class="n">u</span></em>, <em class="sig-param"><span class="n">p</span></em>, <em class="sig-param"><span class="n">U</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tensiga.iga.dbfun.dbfun" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluates derivatives up to <img class="math" src="_images/math/5a939c5280da7202ca4531f175a7780ad5e1f80a.png" alt="n"/> th order of a single
+bspline basis function <img class="math" src="_images/math/fed9fcbf900cb44790bd6a4f1139d3435faea586.png" alt="\frac{\partial^n}{\partial u^n} B_{i,p}(u)"/>
+at the coordinate <img class="math" src="_images/math/9b444cf6329a14140aee8ff5a06ff30772cc1c2f.png" alt="u"/></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>i</strong> (<em>int</em>) – basis function index</p></li>
+<li><p><strong>n</strong> (<em>in</em>) – highest derivative order</p></li>
+<li><p><strong>u</strong> (<em>float</em>) – evaluation point</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – basis function degree</p></li>
+<li><p><strong>U</strong> (<em>np.array</em><em>(</em><em>float</em><em>)</em>) – knot vector</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>scalar values of
+<img class="math" src="_images/math/b48a0c993e96fba92ae28de2644f8c889b699e2c.png" alt="\frac{\partial^k}{\partial u^k} B_{i,p}(u)"/>, <img class="math" src="_images/math/97d3f0076bb239feee0c639f22935869b5eb245a.png" alt="k=0\ldots n"/></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array(float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tensiga.iga.dbfuns.dbfuns">
+<code class="sig-prename descclassname">tensiga.iga.dbfuns.</code><code class="sig-name descname">dbfuns</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em>, <em class="sig-param"><span class="n">n</span></em>, <em class="sig-param"><span class="n">u</span></em>, <em class="sig-param"><span class="n">p</span></em>, <em class="sig-param"><span class="n">U</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tensiga.iga.dbfuns.dbfuns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluates derivatives up to <img class="math" src="_images/math/5a939c5280da7202ca4531f175a7780ad5e1f80a.png" alt="n"/> th order of all non-zero
+bspline basis functions <img class="math" src="_images/math/2443c4c3e6f3360373746d53a002d99fcc10c4c6.png" alt="\frac{\partial^n}{\partial u^n} B_{j,p}(u)"/>
+at the coordinate <img class="math" src="_images/math/9b444cf6329a14140aee8ff5a06ff30772cc1c2f.png" alt="u"/>, <img class="math" src="_images/math/1757717c7157bbceec0ba22b02a54c2f183a87a7.png" alt="j=i-p\ldots i"/>,
+<img class="math" src="_images/math/44882003699c35d1fd4524ca4cc7084c5454be1d.png" alt="(n+1) \times (p+1)"/> values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>i</strong> (<em>int</em>) – knot span in which <img class="math" src="_images/math/9b444cf6329a14140aee8ff5a06ff30772cc1c2f.png" alt="u"/> lies</p></li>
+<li><p><strong>n</strong> (<em>in</em>) – highest derivative order</p></li>
+<li><p><strong>u</strong> (<em>float</em>) – evaluation point</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – basis function degree</p></li>
+<li><p><strong>U</strong> (<em>np.array</em><em>(</em><em>float</em><em>)</em>) – knot vector</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>scalar values of
+<img class="math" src="_images/math/acb4d5b8f1cf09420ccfc9f78b241279428239eb.png" alt="\frac{\partial^k}{\partial u^k} B_{j,p}(u)"/>,
+where dB[k,j] = <img class="math" src="_images/math/acb4d5b8f1cf09420ccfc9f78b241279428239eb.png" alt="\frac{\partial^k}{\partial u^k} B_{j,p}(u)"/>.
+<img class="math" src="_images/math/97d3f0076bb239feee0c639f22935869b5eb245a.png" alt="k=0\ldots n"/></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array(float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tensiga.iga.dbfunsop.dbfunsop">
+<code class="sig-prename descclassname">tensiga.iga.dbfunsop.</code><code class="sig-name descname">dbfunsop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em>, <em class="sig-param"><span class="n">n</span></em>, <em class="sig-param"><span class="n">u</span></em>, <em class="sig-param"><span class="n">p</span></em>, <em class="sig-param"><span class="n">U</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tensiga.iga.dbfunsop.dbfunsop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes values, rows and cols for an operator (a sparse matrix) of the form
+<img class="math" src="_images/math/51b4c72b6d078608685a8ef95817489c4d5ebaec.png" alt="dB_{ij}=\partial_{u_j} B_{i,p}(u_j)"/></p>
+<p>For perfomance and flexibility reasons the sparse matrix is to be
+constructed out of the return values,
+e.g. <cite>scipy.sparse.csc_matrix(vals, rows, cols)</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>int</em>) – derivative order</p></li>
+<li><p><strong>u</strong> (<em>np.array</em><em>(</em><em>float</em><em>)</em>) – evaluation point(s)</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – basis function degree</p></li>
+<li><p><strong>U</strong> (<em>np.array</em><em>(</em><em>float</em><em>)</em>) – knot vector</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(values, (rows, cols))</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(float, (int, int))</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tensiga.iga.kntinsop.kntinsop">
+<code class="sig-prename descclassname">tensiga.iga.kntinsop.</code><code class="sig-name descname">kntinsop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em>, <em class="sig-param"><span class="n">n</span></em>, <em class="sig-param"><span class="n">u</span></em>, <em class="sig-param"><span class="n">p</span></em>, <em class="sig-param"><span class="n">U</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tensiga.iga.kntinsop.kntinsop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the single knot insertion operator
+<img class="math" src="_images/math/f0ae456df40291bb45cbd97cb622153b7a01d6b6.png" alt="A_{ij}"/> in the form of a sparse matrix.
+The knot vector remains unchanged!</p>
+<p>The operation is to be evalated as <img class="math" src="_images/math/6b2dc5d4eed0a4dfdda6cd8749d8d9d333e7500d.png" alt="\tilde{P}_{ij} = P_{ik} A_{kj}"/></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>i</strong> (<em>int</em>) – knot span in which <img class="math" src="_images/math/9b444cf6329a14140aee8ff5a06ff30772cc1c2f.png" alt="u"/> lies</p></li>
+<li><p><strong>n</strong> (<em>int</em>) – number of basis functions defined on the knot vector</p></li>
+<li><p><strong>u</strong> (<em>float</em>) – evaluation point</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – basis degree</p></li>
+<li><p><strong>U</strong> (<em>np.array</em><em>(</em><em>float</em><em>)</em>) – knot vector</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(values, (rows, cols))</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(float, (int, int))</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tensiga.iga.ktsinsop.ktsinsop">
+<code class="sig-prename descclassname">tensiga.iga.ktsinsop.</code><code class="sig-name descname">ktsinsop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span></em>, <em class="sig-param"><span class="n">u</span></em>, <em class="sig-param"><span class="n">p</span></em>, <em class="sig-param"><span class="n">U</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tensiga.iga.ktsinsop.ktsinsop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the multi-knot insertion operator
+<img class="math" src="_images/math/f0ae456df40291bb45cbd97cb622153b7a01d6b6.png" alt="A_{ij}"/> in the form of a sparse matrix, which is returned together
+with the new knot vector.</p>
+<p>The operation is to be evalated as <img class="math" src="_images/math/6b2dc5d4eed0a4dfdda6cd8749d8d9d333e7500d.png" alt="\tilde{P}_{ij} = P_{ik} A_{kj}"/></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>int</em>) – number of basis functions defined on the knot vector</p></li>
+<li><p><strong>u</strong> (<em>np.array</em><em>(</em><em>float</em><em>)</em>) – evaluation points</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – basis degree</p></li>
+<li><p><strong>U</strong> (<em>np.array</em><em>(</em><em>float</em><em>)</em>) – knot vector</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>operator <img class="math" src="_images/math/f0ae456df40291bb45cbd97cb622153b7a01d6b6.png" alt="A_{ij}"/>
+np.array(float) : updated knot vector</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>scipy.sparse.csc_matrix()</p>
+</dd>
+</dl>
+</dd></dl>
+
+<span class="target" id="module-tensiga.iga.Bspline"></span><dl class="py class">
+<dt id="tensiga.iga.Bspline.Bspline">
+<em class="property">class </em><code class="sig-prename descclassname">tensiga.iga.Bspline.</code><code class="sig-name descname">Bspline</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dim</span></em>, <em class="sig-param"><span class="n">codim</span></em>, <em class="sig-param"><span class="n">kv</span></em>, <em class="sig-param"><span class="n">deg</span></em>, <em class="sig-param"><span class="n">ctrlpts</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tensiga.iga.Bspline.Bspline" title="Permalink to this definition">¶</a></dt>
+<dd><p>A data container for a Bspline geometric object and an interface to
+applicable geometric modules.</p>
+<dl class="py attribute">
+<dt id="tensiga.iga.Bspline.Bspline.dim">
+<code class="sig-name descname">dim</code><a class="headerlink" href="#tensiga.iga.Bspline.Bspline.dim" title="Permalink to this definition">¶</a></dt>
+<dd><p>dimension of the Bspline object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="tensiga.iga.Bspline.Bspline.codim">
+<code class="sig-name descname">codim</code><a class="headerlink" href="#tensiga.iga.Bspline.Bspline.codim" title="Permalink to this definition">¶</a></dt>
+<dd><p>dimension of the embedding space</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="tensiga.iga.Bspline.Bspline.kv">
+<code class="sig-name descname">kv</code><a class="headerlink" href="#tensiga.iga.Bspline.Bspline.kv" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of knot vectors in each parametric direction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list(np.array)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="tensiga.iga.Bspline.Bspline.deg">
+<code class="sig-name descname">deg</code><a class="headerlink" href="#tensiga.iga.Bspline.Bspline.deg" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of degrees for each parametric direction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list(int)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="tensiga.iga.Bspline.Bspline.ctrlpts">
+<code class="sig-name descname">ctrlpts</code><a class="headerlink" href="#tensiga.iga.Bspline.Bspline.ctrlpts" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of control point coordinates for each
+coordinate in the embedding space</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list(np.array)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="tensiga.iga.Bspline.Bspline.nbfuns">
+<code class="sig-name descname">nbfuns</code><a class="headerlink" href="#tensiga.iga.Bspline.Bspline.nbfuns" title="Permalink to this definition">¶</a></dt>
+<dd><p>number of basis functions in each direction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>np.array(int)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tensiga.iga.Bspline.Bspline.elsz">
+<code class="sig-name descname">elsz</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tensiga.iga.Bspline.Bspline.elsz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the element sizes in the physical space. Element size is
+defined as the length of the element diagonal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>element sizes</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>array(float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tensiga.iga.Bspline.Bspline.eval">
+<code class="sig-name descname">eval</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">u</span></em>, <em class="sig-param"><span class="n">k</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tensiga.iga.Bspline.Bspline.eval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluates the Bspline in the physical space in direction <code class="docutils literal notranslate"><span class="pre">k</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>u</strong> (<em>List</em><em>(</em><em>np.array</em><em>(</em><em>float</em><em>)</em><em>)</em>) – list of evaluation points in each
+parametric direction</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>coordinates at each grid point in physical
+direction <code class="docutils literal notranslate"><span class="pre">k</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array(float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tensiga.iga.Bspline.Bspline.evalwrt">
+<code class="sig-name descname">evalwrt</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">u</span></em>, <em class="sig-param"><span class="n">P</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tensiga.iga.Bspline.Bspline.evalwrt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluates the Bspline with respect to a set of control points <code class="docutils literal notranslate"><span class="pre">P</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>u</strong> (<em>List</em><em>(</em><em>np.array</em><em>(</em><em>float</em><em>)</em><em>)</em>) – list of evaluation points in each parametric direction</p></li>
+<li><p><strong>P</strong> (<em>np.array</em><em>(</em><em>float</em><em>)</em>) – control points</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>coordinates at each grid point in physical
+direction <code class="docutils literal notranslate"><span class="pre">k</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array(float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tensiga.iga.Bspline.Bspline.nelem">
+<code class="sig-name descname">nelem</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">k</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tensiga.iga.Bspline.Bspline.nelem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the number of elements. If <code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">None</span></code> compute total
+number of elements. For <code class="docutils literal notranslate"><span class="pre">k=1,...,dim</span></code> computes the univariate elements
+in the direction <code class="docutils literal notranslate"><span class="pre">k</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>k</strong> (<em>int</em>) – parametric direction</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>number of elements</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="theory.html" class="btn btn-neutral float-left" title="Theory" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2019, Michał Mika
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
