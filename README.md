@@ -13,9 +13,9 @@ Until I register it as a public pip package, I recommend the following procedure
 
 Under ``bin/`` you can find some examples to run. Other than that, many modules and routines have sample code in the ``__main__`` function, which can be run directly from the terminal, i.e.
 
-  $ python3 -i tensiga/iga/bfun.py
-  $ python3 -i tensiga/iga/bfuns.py
-  $ python3 -i tensiga/iga/Bspline.py
+    $ python3 -i tensiga/iga/bfun.py
+    $ python3 -i tensiga/iga/bfuns.py
+    $ python3 -i tensiga/iga/Bspline.py
 
 Not all examples have been adapted to this new package structure. Some work is needed.
 
@@ -23,13 +23,13 @@ Not all examples have been adapted to this new package structure. Some work is n
 
 The documentation can be generated via
 
-  $ cd docs
-  $ make html
+    $ cd docs
+    $ make html
 
 This generates documentation at ``build/html/`` which can be conveniently access by starting a local http server, i.e.
 
-  $ cd docs/build/html
-  $ python3 -m http.server
+    $ cd docs/build/html
+    $ python3 -m http.server
 
 ## Disclaimer
 
