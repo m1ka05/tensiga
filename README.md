@@ -21,6 +21,10 @@ As soon as the package becomes available in the Python Package Index, it can be 
 
     # apt update && apt install libsuitesparse-dev
 
+Archlinux users might need to provide the ``suitesparse`` package
+
+    # pacman -Suy suitesparse
+
 
 ## Examples
 
