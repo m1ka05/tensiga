@@ -2,6 +2,8 @@
 
 Implementation of a matrix-free isogeometric Galerkin method for Karhunen-Loeve approximation of random fields using tensor product splines, tensor contraction and interpolation based quadrature.
 
+Report: https://www.oden.utexas.edu/media/reports/2020/2014.pdf
+
 ## Installation
 
 Until the package is officially registered in the public Python Package Index, I recommend the following procedure
