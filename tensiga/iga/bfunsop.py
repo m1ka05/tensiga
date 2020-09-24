@@ -1,6 +1,7 @@
 import numpy as np
 from tensiga.iga.fspan import fspan
 from tensiga.iga.bfuns import bfuns
+from tensiga.iga.auxkv import auxkv
 from scipy.sparse import csc_matrix
 from numba.typed import List
 from numba import njit
@@ -25,6 +26,7 @@ def bfunsop(u, p, U):
     nkts = U.size
     nbfuns = nkts - p - 1
     npts = u.size
+
     rows, cols, vals = [], [], []
 
     for j in range(0, npts):

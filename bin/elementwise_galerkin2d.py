@@ -7,14 +7,14 @@ from tensiga.quadrature.glnint import glnint
 from tensiga.fredholm.HilbertSchmidtKern import expkernop as cov
 from tensiga.fredholm.assembly.Galerkin import Galerkin
 
+np.set_printoptions(edgeitems=30, linewidth=100000)
+
 # init geometry
 domain = varmeshes.QuarterAnnulus2D(1.,0.6)
 
-'''
 # refine the spline object
 for k in range(domain.dim):
-    domain.href(np.linspace(0,1,4)[1:-1], k)
-'''
+    domain.href(np.linspace(0,1,3)[1:-1], k)
 
 # compute global quadrature rule
 quadrature = glnint(domain.kv, domain.deg+np.array([1,1]))
@@ -26,8 +26,12 @@ cov_data = np.array([1., .5, 1.])
 method = Galerkin(domain, quadrature, cov, cov_data)
 
 # formation and assembly
-A, B = method.direct()
+Aref, Bref = method._bspline_direct_kron()
+A, B = method._bspline_direct_elementwise()
 
+
+
+'''
 # solution
 neigs = 3
 lambda_h, f_h = eigsh(A, neigs, B) # ordered smallest to highest
@@ -49,3 +53,4 @@ plotter.add_mesh(mesh, show_edges=False, scalars=data.transpose(), stitle='  ', 
 plotter.show_axes()
 plotter.view_xy()
 plotter.show()
+'''

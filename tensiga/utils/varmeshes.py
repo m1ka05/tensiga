@@ -36,6 +36,25 @@ def UnitCube(n, p):
     domain = Bspline(dim, codim, kv, deg, cp)
     return domain
 
+def OpenUnitBasis(n, p, N):
+    dim = n
+    codim = n
+    deg = [ p for _ in range(n) ]
+    kv = [ np.linspace(0, 1, N) for k in range(n) ]
+    cp_shape = [ kv[k].size-p-1 for k in range(n) ]
+
+    # construct control points for n cube
+    cp = [None] * dim
+    cp_proto = [ np.zeros(cp_shape[k]) for k in range(n) ]
+
+    cp[0] = np.repeat(cp_proto[0], np.prod(cp_shape[0:-1])).reshape(cp_shape)
+    for k in range(1, codim):
+        cp[k] = np.tile(np.repeat(cp_proto[k], np.prod(cp_shape[k:-1])), np.prod(cp_shape[0:k])).reshape(cp_shape)
+
+    # init primitive spline
+    domain = Bspline(dim, codim, kv, deg, cp)
+    return domain
+
 def QuarterAnnulus2D(R, r):
     # geometry parameters
     dim = 2;

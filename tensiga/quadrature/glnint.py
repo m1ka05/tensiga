@@ -29,7 +29,7 @@ def glnint(kv, p, tensor_ip_output=False):
             ip[k] = np.repeat(ipts[k], nip/ipts[k].size).reshape(ip_shape)
             ip[k] = np.moveaxis(ip[k], 0, k)
 
-    return Quadrature(ip, weights, W)
+    return Quadrature(p, ip, weights, W)
 
 if __name__ == '__main__':
     from time import time

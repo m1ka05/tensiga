@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.sparse.linalg import eigsh
 import matplotlib.pyplot as plt
-import pyvista as pv
+#import pyvista as pv
 import tensiga.utils.varmeshes as varmeshes
 from tensiga.quadrature.glnint import glnint
 from tensiga.fredholm.HilbertSchmidtKern import expkernop as cov
