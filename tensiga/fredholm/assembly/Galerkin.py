@@ -5,6 +5,7 @@ from tensiga.iga.Nurbs import Nurbs
 from tensiga.iga.Bspline import Bspline
 from tensiga.fredholm.HilbertSchmidtKern import _kern_mat_to_tens, _kern_pts_to_mulidx
 from tensiga.utils.mat_dot_sp import mat_dot_sp
+from sklearn.utils.extmath import cartesian
 
 
 _LinOpInit_wthf = False
@@ -94,6 +95,111 @@ class Galerkin:
 
         return A, B
 
+    def _nurbs_direct_elementwise(self):
+        # important later for reshapes into elem colloc matrices
+        self.B = [ Bk.tocsr() for Bk in self.B ]
+        Bel = [None] * self.domain.dim
+
+        nip_el = self.quadrature.deg
+        gridshape = [ self.domain.nelem(k) for k in range(0, self.domain.dim) ]
+
+        # get elementwise univariate colloc matrices
+        for k in range(0, self.domain.dim):
+            Bel[k] = [None] * self.domain.nelem(k)
+            for el in range(0, self.domain.nelem(k)):
+                Bel[k][el] = self.B[k][:, nip_el[k]*el:nip_el[k]*el+nip_el[k]].data.reshape(-1, nip_el[k])
+
+        # get kronecker jacobian on each element as a view of self.J
+        Jel = [None] * self.domain.nelem()
+        for el in range(0, self.domain.nelem()):
+            el_mulidx = np.unravel_index(el, gridshape)
+            slices = tuple([slice(nip_el[k]*el_mulidx[k], nip_el[k]*el_mulidx[k]+nip_el[k]) for k in range(0, self.domain.dim)])
+            Jel[el] = self.J[slices].view().reshape(-1)
+
+        # get kronecker weighting on each element as a view of self.R
+        Rel = [None] * self.domain.nelem()
+        for el in range(0, self.domain.nelem()):
+            el_mulidx = np.unravel_index(el, gridshape)
+            slices = tuple([slice(nip_el[k]*el_mulidx[k], nip_el[k]*el_mulidx[k]+nip_el[k]) for k in range(0, self.domain.dim)])
+            Rel[el] = self.R[slices].view().reshape(-1)
+            
+        W = self.domain.ctrlpts[-1].view()
+        W = W.reshape(self.domain.ctrlpts[-1].size,-1)
+        
+        # allocate and initialize global matrices
+        A = np.zeros((np.prod(self.domain.nbfuns), np.prod(self.domain.nbfuns)))
+        B = np.zeros((np.prod(self.domain.nbfuns), np.prod(self.domain.nbfuns)))
+
+        # compute element matrices and add contribution to B
+        for el in range(0, self.domain.nelem()):
+            # get kronecker xips on each element 
+            el_mulidx = np.unravel_index(el, gridshape)
+            slices = tuple([slice(nip_el[d]*el_mulidx[d], nip_el[d]*el_mulidx[d]+nip_el[d]) for d in range(0, self.domain.dim)])
+            el_ip = [ self.quadrature.ip[d][slices[d]] for d in range(0, self.domain.dim) ]
+            el_xip = [ self.domain.eval(el_ip, d) for d in range(self.domain.dim) ]
+
+            # precompute element basis matrices
+            Bi = Bel[0][el_mulidx[0]] * self.quadrature.weights[0][slices[0]]
+            for k in range(1, self.domain.dim):
+                Bi = np.kron(Bi, Bel[k][el_mulidx[k]] * self.quadrature.weights[k][slices[k]])
+            Bi = Bi * Jel[el]
+
+            Bj = Bel[0][el_mulidx[0]]
+            for k in range(1, self.domain.dim):
+                Bj = np.kron(Bj, Bel[k][el_mulidx[k]])
+
+            # assemble B on the element
+            Bpart = Bi @ Bj.transpose()
+
+            ldofs = [ self.B[d][:,nip_el[d]*el_mulidx[d]].nonzero()[0] for d in range(0, self.domain.dim) ]
+            gdofs = np.ravel_multi_index(cartesian(ldofs).transpose(), self.domain.nbfuns)
+
+            B[np.ix_(*(gdofs,)*2)] += Bpart
+
+        # compute element matrices and add contribution to A
+        for el1 in range(0, self.domain.nelem()):
+            el1_mulidx = np.unravel_index(el1, gridshape)
+            slices1 = tuple([slice(nip_el[d]*el1_mulidx[d], nip_el[d]*el1_mulidx[d]+nip_el[d]) for d in range(0, self.domain.dim)])
+            el1_ip = [ self.quadrature.ip[d][slices1[d]] for d in range(0, self.domain.dim) ]
+            el1_xip = [ self.domain.eval(el1_ip, d) for d in range(self.domain.dim) ]
+
+            for el2 in range(0, self.domain.nelem()):
+                # get kronecker xips on each element 
+                el2_mulidx = np.unravel_index(el2, gridshape)
+                slices2 = tuple([slice(nip_el[d]*el2_mulidx[d], nip_el[d]*el2_mulidx[d]+nip_el[d]) for d in range(0, self.domain.dim)])
+                el2_ip = [ self.quadrature.ip[d][slices2[d]] for d in range(0, self.domain.dim) ]
+                el2_xip = [ self.domain.eval(el2_ip, d) for d in range(self.domain.dim) ]
+
+                # compute the kernel on the element
+                Gel = self.kernel(
+                  _kern_pts_to_mulidx(el2_xip),
+                  _kern_pts_to_mulidx(el1_xip), self.data)
+            
+                # precompute element basis matrices
+                Bi = Bel[0][el1_mulidx[0]] * self.quadrature.weights[0][slices1[0]]
+                for k in range(1, self.domain.dim):
+                    Bi = np.kron(Bi, Bel[k][el1_mulidx[k]] * self.quadrature.weights[k][slices1[k]])
+                Bi = Bi * Jel[el1]
+
+                # precompute element basis matrices
+                Bj = Bel[0][el2_mulidx[0]] * self.quadrature.weights[0][slices2[0]]
+                for k in range(1, self.domain.dim):
+                    Bj = np.kron(Bj, Bel[k][el2_mulidx[k]] * self.quadrature.weights[k][slices2[k]])
+                Bj = Bj * Jel[el2]
+               
+                # assemble A on the element
+                Apart = Bj @ Gel @ Bi.transpose() # ich muss hier zwei mal uber die elemente summieren!!!!
+
+                ldofs1 = [ self.B[d][:,nip_el[d]*el1_mulidx[d]].nonzero()[0] for d in range(0, self.domain.dim) ]
+                ldofs2 = [ self.B[d][:,nip_el[d]*el2_mulidx[d]].nonzero()[0] for d in range(0, self.domain.dim) ]
+
+                gdofs1 = np.ravel_multi_index(cartesian(ldofs1).transpose(), self.domain.nbfuns)
+                gdofs2 = np.ravel_multi_index(cartesian(ldofs2).transpose(), self.domain.nbfuns)
+                
+                A[np.ix_(*(gdofs2,gdofs1))] += Apart
+
+        return A, B
+
     def _nurbs_direct_sumfac(self):
         pass
 
@@ -170,12 +276,9 @@ class Galerkin:
         return A, B
 
     def _bspline_direct_elementwise(self):
-
         # important later for reshapes into elem colloc matrices
         self.B = [ Bk.tocsr() for Bk in self.B ]
-
         Bel = [None] * self.domain.dim
-        Bnnz = [ Bk.nonzero() for Bk in self.B ]
 
         nip_el = self.quadrature.deg
         gridshape = [ self.domain.nelem(k) for k in range(0, self.domain.dim) ]
@@ -186,7 +289,6 @@ class Galerkin:
             for el in range(0, self.domain.nelem(k)):
                 Bel[k][el] = self.B[k][:, nip_el[k]*el:nip_el[k]*el+nip_el[k]].data.reshape(-1, nip_el[k])
 
-
         # get kronecker jacobian on each element as a view of self.J
         Jel = [None] * self.domain.nelem()
         for el in range(0, self.domain.nelem()):
@@ -194,14 +296,11 @@ class Galerkin:
             slices = tuple([slice(nip_el[k]*el_mulidx[k], nip_el[k]*el_mulidx[k]+nip_el[k]) for k in range(0, self.domain.dim)])
             Jel[el] = self.J[slices].view().reshape(-1)
         
+        # allocate and initialize global matrices
         A = np.zeros((np.prod(self.domain.nbfuns), np.prod(self.domain.nbfuns)))
         B = np.zeros((np.prod(self.domain.nbfuns), np.prod(self.domain.nbfuns)))
 
-        G = self.kernel(
-          _kern_pts_to_mulidx(self.xip),
-          _kern_pts_to_mulidx(self.xip), self.data)
-        Gref = np.zeros(G.shape)
-        # compute element matrices and add contribution to A, B 
+        # compute element matrices and add contribution to B
         for el in range(0, self.domain.nelem()):
             # get kronecker xips on each element 
             el_mulidx = np.unravel_index(el, gridshape)
@@ -209,11 +308,6 @@ class Galerkin:
             el_ip = [ self.quadrature.ip[d][slices[d]] for d in range(0, self.domain.dim) ]
             el_xip = [ self.domain.eval(el_ip, d) for d in range(self.domain.dim) ]
 
-            # compute the kernel on the element
-            Gel = self.kernel(
-              _kern_pts_to_mulidx(el_xip),
-              _kern_pts_to_mulidx(el_xip), self.data)
-        
             # precompute element basis matrices
             Bi = Bel[0][el_mulidx[0]] * self.quadrature.weights[0][slices[0]]
             for k in range(1, self.domain.dim):
@@ -223,41 +317,56 @@ class Galerkin:
             Bj = Bel[0][el_mulidx[0]]
             for k in range(1, self.domain.dim):
                 Bj = np.kron(Bj, Bel[k][el_mulidx[k]])
-           
-            # assemble A on the element
-            Apart = Bi @ Gel @ Bi.transpose() # ich muss hier zwei mal uber die elemente summieren!!!!
 
             # assemble B on the element
-            Bpart = (Bi * Jel[el]) @ Bj.transpose()
-
-
+            Bpart = Bi @ Bj.transpose()
 
             ldofs = [ self.B[d][:,nip_el[d]*el_mulidx[d]].nonzero()[0] for d in range(0, self.domain.dim) ]
-
-            xdofs = [] 
-            ydofs = [] 
-            zdofs = []
-            for x in ldofs[0]:
-                for y in ldofs[1]:
-                    #for z in ldofs[2]:
-                        xdofs.append(x)
-                        ydofs.append(y)
-                        #zdofs.append(z)
-            #gdofs = np.ravel_multi_index((xdofs,ydofs,zdofs), self.domain.nbfuns)
-            gdofs = np.ravel_multi_index((xdofs,ydofs), self.domain.nbfuns)
-            
-            
-            A[np.ix_(*(gdofs,)*2)] += Apart
+            gdofs = np.ravel_multi_index(cartesian(ldofs).transpose(), self.domain.nbfuns)
 
             B[np.ix_(*(gdofs,)*2)] += Bpart
+
+        # compute element matrices and add contribution to A
+        for el1 in range(0, self.domain.nelem()):
+            el1_mulidx = np.unravel_index(el1, gridshape)
+            slices1 = tuple([slice(nip_el[d]*el1_mulidx[d], nip_el[d]*el1_mulidx[d]+nip_el[d]) for d in range(0, self.domain.dim)])
+            el1_ip = [ self.quadrature.ip[d][slices1[d]] for d in range(0, self.domain.dim) ]
+            el1_xip = [ self.domain.eval(el1_ip, d) for d in range(self.domain.dim) ]
+
+            for el2 in range(0, self.domain.nelem()):
+                # get kronecker xips on each element 
+                el2_mulidx = np.unravel_index(el2, gridshape)
+                slices2 = tuple([slice(nip_el[d]*el2_mulidx[d], nip_el[d]*el2_mulidx[d]+nip_el[d]) for d in range(0, self.domain.dim)])
+                el2_ip = [ self.quadrature.ip[d][slices2[d]] for d in range(0, self.domain.dim) ]
+                el2_xip = [ self.domain.eval(el2_ip, d) for d in range(self.domain.dim) ]
+
+                # compute the kernel on the element
+                Gel = self.kernel(
+                  _kern_pts_to_mulidx(el2_xip),
+                  _kern_pts_to_mulidx(el1_xip), self.data)
             
-            print(Gel)
-            print(gdofs)
-            Gref[np.ix_(*(gdofs,)*2)] = Gel
-        import pdb; pdb.set_trace()
+                # precompute element basis matrices
+                Bi = Bel[0][el1_mulidx[0]] * self.quadrature.weights[0][slices1[0]]
+                for k in range(1, self.domain.dim):
+                    Bi = np.kron(Bi, Bel[k][el1_mulidx[k]] * self.quadrature.weights[k][slices1[k]])
+                Bi = Bi * Jel[el1]
 
+                # precompute element basis matrices
+                Bj = Bel[0][el2_mulidx[0]] * self.quadrature.weights[0][slices2[0]]
+                for k in range(1, self.domain.dim):
+                    Bj = np.kron(Bj, Bel[k][el2_mulidx[k]] * self.quadrature.weights[k][slices2[k]])
+                Bj = Bj * Jel[el2]
+               
+                # assemble A on the element
+                Apart = Bj @ Gel @ Bi.transpose() # ich muss hier zwei mal uber die elemente summieren!!!!
 
+                ldofs1 = [ self.B[d][:,nip_el[d]*el1_mulidx[d]].nonzero()[0] for d in range(0, self.domain.dim) ]
+                ldofs2 = [ self.B[d][:,nip_el[d]*el2_mulidx[d]].nonzero()[0] for d in range(0, self.domain.dim) ]
 
+                gdofs1 = np.ravel_multi_index(cartesian(ldofs1).transpose(), self.domain.nbfuns)
+                gdofs2 = np.ravel_multi_index(cartesian(ldofs2).transpose(), self.domain.nbfuns)
+                
+                A[np.ix_(*(gdofs2,gdofs1))] += Apart
 
         return A, B
 
