@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.sparse.linalg import eigsh
+from scipy.linalg import eig
 import matplotlib.pyplot as plt
 import pyvista as pv
 import tensiga.utils.varmeshes as varmeshes
@@ -19,7 +20,7 @@ domain = varmeshes.Halfpipe3D(10, 8, 15)
 #domain.href(np.linspace(0, 1, 11)[1:-1], 2)
 for k in range(domain.dim):
     domain.href(np.linspace(0,1,6)[1:-1], k)
-''' rahmans mesh
+''' 
 domain.href(np.arange(0, 0.5, 1/32)[1:])
 domain.href(np.arange(0.5, 1, 1/32)[1:])
 domain.href(np.arange(0, 1, 1/8)[1:], 2)
@@ -51,13 +52,16 @@ cov_data = np.array([1., 0.5, 10.])
 method = Galerkin(domain, quadrature, cov, cov_data)
 
 # formation and assembly
-A, B = method._bspline_direct_elementwise()
+A, B = method._nurbs_direct_elementwise()
+Aref, Bref = method._bspline_direct_elementwise()
+
 
 
 # solution
 neigs = 10
 lambda_h, f_h = eigsh(A, neigs, B) # ordered smallest to highest
 print(lambda_h)
+import pdb; pdb.set_trace()
 
 #method.normalize_ev(f_h)
 # eval geometry

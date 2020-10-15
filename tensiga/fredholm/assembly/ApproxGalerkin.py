@@ -13,6 +13,7 @@ from tensiga.utils.mat_dot_sp import mat_dot_sp
 from tensiga.utils.mat_mul_vec import mat_mul_vec
 from tensiga.utils.splu_solve_mat import splu_solve_mat
 from tensiga.utils.sp_tri_solve_mat import sp_tri_solve_mat
+from sklearn.utils.extmath import cartesian
 
 _LinOpInit_wthf = False
 n_it_count = 0
@@ -44,6 +45,9 @@ class ApproxGalerkin:
 
         # init Bspline interpolant
         self.interp = BsplineInterp(self.domain, self.idomain)
+
+        # compute jacobian ## this is stupid, need to get rid of it! Eats ram
+        #self.J = self.domain.jacobian(self.quadrature.ip)
 
     def eval_ef(self, ep, ev, k):
         # ev into tensor of coeffs (each columnt corresponds to an ev)
@@ -166,7 +170,7 @@ class ApproxGalerkin:
 
     def direct(self):
         # compute kernel at greville abscissa
-        cov = self.kernel(
+        A = self.kernel(
           _kern_pts_to_mulidx(self.interp.gp_phys),
           _kern_pts_to_mulidx(self.interp.gp_phys), self.data)
 
@@ -174,21 +178,219 @@ class ApproxGalerkin:
         jac = np.sqrt(self.domain.jacobian(self.interp.gp)).view().reshape(-1)
 
         # f := Cov(x,y) * (DF(x)*DF(y)) ** 1/2
-        f = cov * jac[:, np.newaxis] * jac[:, np.newaxis].transpose() # J@Cov@J
-        f = _kern_mat_to_tens(f, self.interp.gp_phys[0].shape,
+        A = A * jac[:, np.newaxis] * jac[:, np.newaxis].transpose() # J@Cov@J
+        A = _kern_mat_to_tens(A, self.interp.gp_phys[0].shape,
           self.interp.gp_phys[0].shape)
 
-        G = self.interp.direct_gkl_eval(f)
+        print('interpolation')
+        self.interp.compute_lu()
+        A = splu_solve_mat(self.interp.lu[0], A, 0)
+        A = splu_solve_mat(self.interp.lu[0], A, self.idomain.dim)
+        for k in range(1, self.idomain.dim):
+            A = splu_solve_mat(self.interp.lu[k], A, k)
+            A = splu_solve_mat(self.interp.lu[k], A, k+self.idomain.dim)
 
         Mk = [None] * self.domain.dim
         for k in range(self.domain.dim):
             Mk[k] = self.Bt[k].multiply(self.quadrature.weights[k]) @ self.B[k].transpose()
 
+        print('contraction')
         # compute A by tensor contraction
-        A = mat_dot_sp(G, Mk[0], 0)
+        A = mat_dot_sp(A, Mk[0], 0)
         A = mat_dot_sp(A, Mk[0], self.domain.dim)
         for k in range(1, self.domain.dim):
             A = mat_dot_sp(A, Mk[k], k)
+            A = mat_dot_sp(A, Mk[k], k+self.domain.dim)
+
+        # precompute univariate mass matrices for B
+        Bk = [None] * self.domain.dim
+        for k in range(self.domain.dim):
+            Bk[k] = self.B[k] @ self.B[k].multiply(self.quadrature.weights[k]).transpose()
+
+        # compute B or the preconditioners
+        if self.precond == True:
+            L = [cholesky(Bk_k.tocsc(), ordering_method='natural').L().tocsr()
+              for Bk_k in Bk]
+            B = None
+
+            print('preconditioning')
+            # apply preconditioning
+            for k in range(0, self.domain.dim):
+                A = sp_tri_solve_mat(L[k], A, k)
+                A = sp_tri_solve_mat(L[k], A, k+self.domain.dim)
+        else:
+            B = Bk[0]
+            for k in range(1, self.domain.dim):
+                B = kron(B, Bk[k])
+
+        Ashape = (np.prod(self.domain.nbfuns),)*2
+        A = A.reshape(Ashape) # reshape from A_{i1..id j1..jd} to A_{IJ}
+
+        return A, B
+
+    def exact_elementwise(self):
+        # important later for reshapes into elem colloc matrices
+        self.B = [ Bk.tocsr() for Bk in self.B ]
+        Bel = [None] * self.domain.dim
+
+        nip_el = self.quadrature.deg
+        gridshape = [ self.domain.nelem(k) for k in range(0, self.domain.dim) ]
+
+        # get elementwise univariate colloc matrices
+        for k in range(0, self.domain.dim):
+            Bel[k] = [None] * self.domain.nelem(k)
+            for el in range(0, self.domain.nelem(k)):
+                Bel[k][el] = self.B[k][:, nip_el[k]*el:nip_el[k]*el+nip_el[k]].data.reshape(-1, nip_el[k])
+
+        # get kronecker jacobian on each element as a view of self.J
+        Jel = [None] * self.domain.nelem()
+        for el in range(0, self.domain.nelem()):
+            el_mulidx = np.unravel_index(el, gridshape)
+            slices = tuple([slice(nip_el[k]*el_mulidx[k], nip_el[k]*el_mulidx[k]+nip_el[k]) for k in range(0, self.domain.dim)])
+            Jel[el] = np.sqrt(self.J[slices].view().reshape(-1))
+        
+        # allocate and initialize global matrices
+        A = np.zeros((np.prod(self.domain.nbfuns), np.prod(self.domain.nbfuns)))
+        B = np.zeros((np.prod(self.domain.nbfuns), np.prod(self.domain.nbfuns)))
+
+        # compute element matrices and add contribution to B
+        for el in range(0, self.domain.nelem()):
+            # get kronecker xips on each element 
+            el_mulidx = np.unravel_index(el, gridshape)
+            slices = tuple([slice(nip_el[d]*el_mulidx[d], nip_el[d]*el_mulidx[d]+nip_el[d]) for d in range(0, self.domain.dim)])
+            el_ip = [ self.quadrature.ip[d][slices[d]] for d in range(0, self.domain.dim) ]
+            el_xip = [ self.domain.eval(el_ip, d) for d in range(self.domain.dim) ]
+
+            # precompute element basis matrices
+            Bi = Bel[0][el_mulidx[0]] * self.quadrature.weights[0][slices[0]]
+            for k in range(1, self.domain.dim):
+                Bi = np.kron(Bi, Bel[k][el_mulidx[k]] * self.quadrature.weights[k][slices[k]])
+
+            Bj = Bel[0][el_mulidx[0]]
+            for k in range(1, self.domain.dim):
+                Bj = np.kron(Bj, Bel[k][el_mulidx[k]])
+
+            # assemble B on the element
+            Bpart = Bi @ Bj.transpose()
+
+            ldofs = [ self.B[d][:,nip_el[d]*el_mulidx[d]].nonzero()[0] for d in range(0, self.domain.dim) ]
+            gdofs = np.ravel_multi_index(cartesian(ldofs).transpose(), self.domain.nbfuns)
+
+            B[np.ix_(*(gdofs,)*2)] += Bpart
+        
+        # compute element matrices and add contribution to A
+        for el1 in range(0, self.domain.nelem()):
+            print(el1)
+            el1_mulidx = np.unravel_index(el1, gridshape)
+            slices1 = tuple([slice(nip_el[d]*el1_mulidx[d], nip_el[d]*el1_mulidx[d]+nip_el[d]) for d in range(0, self.domain.dim)])
+            el1_ip = [ self.quadrature.ip[d][slices1[d]] for d in range(0, self.domain.dim) ]
+            el1_xip = [ self.domain.eval(el1_ip, d) for d in range(self.domain.dim) ]
+
+            # define index map
+            ldofs1 = [ self.B[d][:,nip_el[d]*el1_mulidx[d]].nonzero()[0] for d in range(0, self.domain.dim) ]
+            gdofs1 = np.ravel_multi_index(cartesian(ldofs1).transpose(), self.domain.nbfuns)
+
+            # precompute element basis matrices
+            Bi = Bel[0][el1_mulidx[0]] * self.quadrature.weights[0][slices1[0]]
+            for k in range(1, self.domain.dim):
+                Bi = np.kron(Bi, Bel[k][el1_mulidx[k]] * self.quadrature.weights[k][slices1[k]])
+            Bi = Bi * Jel[el1] # actually its sqrt(J)
+
+            for el2 in range(0, self.domain.nelem()):
+                # get kronecker xips on each element 
+                el2_mulidx = np.unravel_index(el2, gridshape)
+                slices2 = tuple([slice(nip_el[d]*el2_mulidx[d], nip_el[d]*el2_mulidx[d]+nip_el[d]) for d in range(0, self.domain.dim)])
+                el2_ip = [ self.quadrature.ip[d][slices2[d]] for d in range(0, self.domain.dim) ]
+                el2_xip = [ self.domain.eval(el2_ip, d) for d in range(self.domain.dim) ]
+
+                # compute the kernel on the element
+                Gel = self.kernel(
+                  _kern_pts_to_mulidx(el2_xip),
+                  _kern_pts_to_mulidx(el1_xip), self.data)
+
+                # precompute element basis matrices
+                Bj = Bel[0][el2_mulidx[0]] * self.quadrature.weights[0][slices2[0]]
+                for k in range(1, self.domain.dim):
+                    Bj = np.kron(Bj, Bel[k][el2_mulidx[k]] * self.quadrature.weights[k][slices2[k]])
+                Bj = Bj * Jel[el2] # actually its sqrt(J)
+               
+                # assemble A on the element
+                Apart = Bj @ Gel @ Bi.transpose()
+
+                ldofs2 = [ self.B[d][:,nip_el[d]*el2_mulidx[d]].nonzero()[0] for d in range(0, self.domain.dim) ]
+                gdofs2 = np.ravel_multi_index(cartesian(ldofs2).transpose(), self.domain.nbfuns)
+
+                
+                A[np.ix_(*(gdofs2,gdofs1))] += Apart
+
+        return A, B
+    
+    def exact_kron(self):
+        J = self.J.view().reshape(-1)
+        G = self.kernel(
+          _kern_pts_to_mulidx(self.xip),
+          _kern_pts_to_mulidx(self.xip), self.data)
+
+        # precompute basis matrices
+        Bi = self.B[0].multiply(self.quadrature.weights[0])
+        for k in range(1, self.domain.dim):
+            Bi = kron(Bi, self.B[k].multiply(self.quadrature.weights[k]))
+        Bi = Bi.tocsr()
+
+        Bj = self.B[0]
+        for k in range(1, self.domain.dim):
+            Bj = kron(Bj, self.B[k])
+
+        # assemble B
+        B = Bi.tocsr() @ Bj.transpose().tocsc()
+
+        # caution: Bi mutated
+        Bi = Bi.multiply(np.sqrt(J))
+        A = Bi.tocsr() @ G @ Bi.transpose().tocsc()
+
+        return A, B
+
+    '''
+    def direct_elementwise(self):
+        # compute mass matrices
+        Mk = [None] * self.domain.dim
+        for k in range(self.domain.dim):
+            Mk[k] = self.Bt[k].multiply(self.quadrature.weights[k]) @ self.B[k].transpose()
+        
+        # do this element, row or columnwise
+        # compute kernel at greville abscissa
+        gp_phys_mulidx = _kern_pts_to_mulidx(self.interp.gp_phys)
+        # compute square root of jacobian dets at greville abscissa
+        jac = np.sqrt(self.domain.jacobian(self.interp.gp)).view().reshape(-1)
+
+        self.interp.compute_lu()
+        H = np.empty((np.prod(self.idomain.nbfuns), np.prod(self.idomain.nbfuns)))
+        for k in range(np.prod(self.idomain.nbfuns)):
+            cov = self.kernel(
+              gp_phys_mulidx[k, np.newaxis],
+              gp_phys_mulidx, self.data)
+
+
+            # f := Cov(x,y) * (DF(x)*DF(y)) ** 1/2
+            f = cov * jac[k, np.newaxis] * jac[:, np.newaxis].transpose() # J@Cov@J
+            f = _kern_mat_to_tens(f, (1,1,1), self.interp.gp_phys[0].shape)
+
+            Gr = splu_solve_mat(self.interp.lu[0], f, self.interp.idomain.dim)
+            for k in range(1, self.idomain.dim):
+                Gr = splu_solve_mat(self.interp.lu[k], Gr, k+self.interp.idomain.dim)
+
+            Ar = mat_dot_sp(Gr, Mk[0], self.domain.dim)
+            for k in range(1, self.domain.dim):
+                Ar = mat_dot_sp(Ar, Mk[k], k+self.domain.dim)
+
+            import pdb; pdb.set_trace()
+
+        G = splu_solve_mat(self.interp.lu[0], H, 0)
+        for k in range(1, self.idomain.dim):
+            G = splu_solve_mat(self.interp.lu[k], G, k+self.interp.idomain.dim)
+
+        A = mat_dot_sp(A, Mk[0], 0)
+        for k in range(1, self.domain.dim):
             A = mat_dot_sp(A, Mk[k], k+self.domain.dim)
 
         # precompute univariate mass matrices for B
@@ -215,6 +417,7 @@ class ApproxGalerkin:
         A = A.reshape(Ashape) # reshape from A_{i1..id j1..jd} to A_{IJ}
 
         return A, B
+    '''
 
     def matrix_free(self):
         # precompute univariate mass matrices for B
@@ -251,7 +454,7 @@ class ApproxGalerkin:
             global it_time
             n_it_count += 1
             it_time = time()
-            #print('iter: ', n_it_count)
+            print('iter: ', n_it_count)
 
             # reshape vector of coeffs into a tensor
             v = v.view().reshape(self.domain.nbfuns)

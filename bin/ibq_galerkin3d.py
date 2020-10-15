@@ -15,8 +15,8 @@ idomain = varmeshes.Halfpipe3D(10, 8, 15)
 for k in range(domain.dim):
     domain.href(np.linspace(0, 0.5, 5)[1:-1], k)
     domain.href(np.linspace(0.5, 1, 5)[1:-1], k)
-    idomain.href(np.linspace(0, 0.5, 5)[1:-1], k)
-    idomain.href(np.linspace(0.5, 1, 5)[1:-1], k)
+    idomain.href(np.linspace(0, 0.5, 10)[1:-1], k)
+    idomain.href(np.linspace(0.5, 1, 10)[1:-1], k)
 
 # compute global quadrature rule
 quadrature = glnint(domain.kv, domain.deg+np.array([1,1,1]))
@@ -29,6 +29,7 @@ method = ApproxGalerkin(domain, idomain, quadrature, cov, cov_data)
 
 # formation and assembly
 A, B = method.direct()
+Aref, Bref = method.exact_kron()
 
 # solution
 neigs = 10

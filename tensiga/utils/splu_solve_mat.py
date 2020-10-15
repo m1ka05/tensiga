@@ -9,9 +9,9 @@ def splu_solve_mat(A, B, axis=-1, trans='N'):
 
     # solve along the first axis
     B = B.reshape(Bshape[0], np.prod(Bshape[1:]))
-    C = A.solve(B, trans)
+    A = A.solve(B, trans)
 
-    C = C.reshape(Bshape)
-    C = np.moveaxis(C, 0, axis)
+    A = A.reshape(Bshape)
+    A = np.moveaxis(A, 0, axis)
 
-    return C
+    return A

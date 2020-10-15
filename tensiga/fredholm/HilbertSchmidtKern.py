@@ -57,6 +57,10 @@ def expkernop_at(x, xp, y, data):
 
     return res
 
+##
+## https://datascience.blog.wzb.eu/2018/02/02/vectorization-and-parallelization-in-python-with-numpy-and-pandas/
+##
+
 @jit(float64[:,:](float64[:,:], float64[:,:], float64[:]), parallel=True, fastmath=True)
 def sepexpkernop(x, xp, data):
     G = np.empty((x.shape[0], xp.shape[0]))

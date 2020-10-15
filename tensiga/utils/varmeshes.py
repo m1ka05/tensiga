@@ -197,3 +197,20 @@ def Shell3d():
 
     spline = Nurbs(dim, codim, kv, deg, ctrlpts)
     return spline
+
+# gets C0 bspline mesh of given size for any domain
+def interpolation_mesh(domain, ref_nodes, p=1):
+    idomain = UnitCube(domain.dim, 1)
+    
+    for k in range(0, idomain.dim):
+        idomain.href(ref_nodes[k], k)
+
+    ep = [ np.unique(kv) for kv in idomain.kv ]
+    ctrlpts = [ domain.eval(ep, k) for k in range(domain.dim) ]
+    idomain.ctrlpts = ctrlpts
+
+    if int(p) > 1:
+        for k in range(idomain.dim):
+            idomain.pref(p-1, k)
+
+    return idomain 
