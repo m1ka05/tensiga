@@ -2,6 +2,8 @@
 
 Implementation of a matrix-free isogeometric Galerkin method for Karhunen-Loeve approximation of random fields using tensor product splines, tensor contraction and interpolation based quadrature.
 
+Report: https://www.oden.utexas.edu/media/reports/2020/2014.pdf
+
 ## Installation
 
 Until the package is officially registered in the public Python Package Index, I recommend the following procedure
@@ -20,6 +22,10 @@ As soon as the package becomes available in the Python Package Index, it can be 
 ``Scikit-sparse`` requires ``libsuitesparse`` to build. Ubuntu users can install this library as follows
 
     # apt update && apt install libsuitesparse-dev
+
+Archlinux users might need to provide the ``suitesparse`` package
+
+    # pacman -Suy suitesparse
 
 
 ## Examples
