@@ -1,3 +1,13 @@
+import os
+thread_env = ["OMP_NUM_THREADS",
+  "NUMBA_NUM_THREADS",
+  "OPENBLAS_NUM_THREADS"
+  "MKL_NUM_THREADS"
+  "VECLIB_MAXIMUM_THREADS"
+  "NUMEXPR_NUM_THREADS"]
+for env in thread_env:
+    os.environ[env] = "1"
+
 import numpy as np
 from scipy.sparse.linalg import eigsh
 import matplotlib.pyplot as plt

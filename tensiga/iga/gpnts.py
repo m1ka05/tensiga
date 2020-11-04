@@ -1,7 +1,8 @@
 import numpy as np
 from numba import njit
+from tensiga.iga.auxkv import auxkv
 
-@njit
+#@njit
 def gpnts(p, U):
     ## COMPUTE GREVILLE NODES
     nkts = U.size
@@ -14,6 +15,20 @@ def gpnts(p, U):
             Gk += U[k+l]
 
         G[k] = Gk / (p)
+
+    # in the case of C^-1
+    Z, M = auxkv(G)
+    if sum(M) != M.size:
+        G_update = []
+        eps = 1e-12
+        for z, m in zip(Z, M):
+            if m == 2:
+                G_update.append(z - eps)
+                G_update.append(z + eps)
+            else:
+                G_update.append(z)
+
+        G = np.array(G_update)
 
     return G
 

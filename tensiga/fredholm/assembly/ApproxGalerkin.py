@@ -16,6 +16,8 @@ from tensiga.utils.sp_tri_solve_mat import sp_tri_solve_mat
 from sklearn.utils.extmath import cartesian
 
 _LinOpInit_wthf = False
+_nonParaTime = 0.0
+_paraTime = 0.0
 n_it_count = 0
 it_time = 0
 
@@ -452,8 +454,12 @@ class ApproxGalerkin:
             ##
             global n_it_count
             global it_time
+            global _nonParaTime
+            global _paraTime
+
             n_it_count += 1
             it_time = time()
+            it_nonParaTime = time()
             print('iter: ', n_it_count)
 
             # reshape vector of coeffs into a tensor
@@ -484,6 +490,9 @@ class ApproxGalerkin:
             # stage 4
             Yp = Y * jac
 
+            _nonParaTime += time() - it_nonParaTime 
+            it_paraTime = time()
+
             #print('... stage 5 in progress')
             # stage 5
             Zp = self.kernel(
@@ -492,6 +501,9 @@ class ApproxGalerkin:
                   Yp.reshape(-1),
                   self.data)
             Zp = Zp.view().reshape(jac.shape)
+
+            _paraTime += time() - it_paraTime
+            it_nonParaTime = time()
 
             #print('... stage 6 in progress')
             # stage 6
@@ -519,7 +531,10 @@ class ApproxGalerkin:
             else:
                 vp = V.view()
 
+            _nonParaTime += time() - it_nonParaTime 
+
             #print('iter time: ', time()-it_time)
+            print(_nonParaTime/_paraTime)
             return vp.view().reshape(-1)
 
         Ashape = (np.prod(self.domain.nbfuns),)*2

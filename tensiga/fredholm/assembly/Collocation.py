@@ -9,7 +9,10 @@ from sklearn.utils.extmath import cartesian
 
 
 _LinOpInit_wthf = False
+_nonParaTime = 0.0
+_paraTime = 0.0
 n_it_count = 0
+it_time = 0
 
 class Collocation:
 
@@ -270,5 +273,56 @@ class Collocation:
                 
             A[:,gdofs] += Apart
 
+        return A, Bi.transpose()
+
+    def _nurbs_matrix_free(self):
+        J = self.J.view().reshape(-1)
+        R = self.R.view().reshape(-1)
+        Rgp = self.Rgp.view().reshape(-1)
+        W = self.domain.ctrlpts[-1].view()
+        W = W.reshape(self.domain.ctrlpts[-1].size,-1)
+
+        # precompute basis matrices
+        Bj = self.B[0].multiply(self.quadrature.weights[0])
+        for k in range(1, self.domain.dim):
+            Bj = kron(Bj, self.B[k].multiply(self.quadrature.weights[k]))
+        Bj = Bj.tocsr().multiply(R).multiply(J)
+        Bj = Bj.tocsc().multiply(W)
+        BjT = Bj.transpose()
+
+
+        def mv(v):
+            ## This ugly lady fixes the unnecessary 1st call to mv(v)
+            global _LinOpInit_wthf
+            if _LinOpInit_wthf == False:
+                _LinOpInit_wthf = True
+                return v
+            ##
+
+            global n_it_count
+            global it_time
+            global _nonParaTime
+            global _paraTime
+
+            n_it_count += 1
+            print('iter:', n_it_count)
+            
+            y = BjT * v
+            vp = self.kernel(
+                  _kern_pts_to_mulidx(self.gpp),
+                  _kern_pts_to_mulidx(self.xip),
+                  y, self.data)
+            return vp
+
+
+        # compute tensorproduct bsplines collocation matrix at greville abs
+        Bi = self.Bgp[0]
+        for k in range(1, self.domain.dim):
+            Bi = kron(Bi, self.Bgp[k])
+        Bi = Bi.tocsr().multiply(Rgp)
+        Bi = Bi.tocsc().multiply(W)
+
+        Ashape = (np.prod(self.domain.nbfuns),)*2
+        A = LinearOperator(Ashape, matvec=mv)
         return A, Bi.transpose()
 

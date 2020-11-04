@@ -28,6 +28,8 @@ setup(
         "numba",
         "scipy",
         "scikit-sparse",
+        "sklearn",
+        "sharedmem",
         "vtk",
         "pyvista",
         "matplotlib",

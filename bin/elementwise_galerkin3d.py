@@ -1,3 +1,13 @@
+import os
+thread_env = ["OMP_NUM_THREADS",
+  "NUMBA_NUM_THREADS",
+  "OPENBLAS_NUM_THREADS"
+  "MKL_NUM_THREADS"
+  "VECLIB_MAXIMUM_THREADS"
+  "NUMEXPR_NUM_THREADS"]
+for env in thread_env:
+    os.environ[env] = "1"
+
 import numpy as np
 from scipy.sparse.linalg import eigsh
 from scipy.linalg import eig
@@ -14,17 +24,10 @@ np.set_printoptions(edgeitems=30, linewidth=100000)
 # init geometry
 domain = varmeshes.Halfpipe3D(10, 8, 15)
 
-# refine the spline object
-#domain.href(np.linspace(0, 0.5, 14)[1:-1], 0)
-#domain.href(np.linspace(0.5, 1, 14)[1:-1], 0)
-#domain.href(np.linspace(0, 1, 11)[1:-1], 2)
-for k in range(domain.dim):
-    domain.href(np.linspace(0,1,6)[1:-1], k)
-''' 
+# refine the spline object (analog to Rahman2018)
 domain.href(np.arange(0, 0.5, 1/32)[1:])
 domain.href(np.arange(0.5, 1, 1/32)[1:])
 domain.href(np.arange(0, 1, 1/8)[1:], 2)
-'''
 
 # eval geometry
 ep = [ np.unique(kv) for kv in domain.kv ]
@@ -60,8 +63,6 @@ Aref, Bref = method._bspline_direct_elementwise()
 # solution
 neigs = 10
 lambda_h, f_h = eigsh(A, neigs, B) # ordered smallest to highest
-print(lambda_h)
-import pdb; pdb.set_trace()
 
 #method.normalize_ev(f_h)
 # eval geometry

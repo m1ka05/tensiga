@@ -36,6 +36,23 @@ def UnitCube(n, p):
     domain = Bspline(dim, codim, kv, deg, cp)
     return domain
 
+def DiscontinuousLine(p):
+    deg = [p]
+    kv = [ np.hstack([
+            np.repeat(0., p+1),
+            np.array(0.2),
+            np.repeat(0.5, p+1),
+            np.array(0.75),
+            np.repeat(1., p+1) ])
+        ]
+
+    # construct control points for n cube
+    cp = [ np.zeros((kv[0].size - deg[0] - 1)) ]
+
+    # init primitive spline
+    domain = Bspline(1, 1, kv, deg, cp)
+    return domain
+
 def OpenUnitBasis(n, p, N):
     dim = n
     codim = n
