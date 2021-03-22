@@ -7,16 +7,12 @@ Publication: https://doi.org/10.1016/j.cma.2021.113730
 
 ## Installation
 
-Until the package is officially registered in the public Python Package Index, I recommend the following procedure
+This package will not be registered in the public Python Package Index, I recommend the following procedure
 
 1. Clone the repository to your local machine and navigate to the main directory
 2. Run ``sudo pip3 install -e ./`` in order to install the ``tensiga`` package locally on your machine.
 
 The installation references to the cloned repository. You can work on this repository and changes will be immediately applied to the installation.
-
-As soon as the package becomes available in the Python Package Index, it can be installed by running
-
-    sudo pip3 install tensiga
 
 ### Notice
 
